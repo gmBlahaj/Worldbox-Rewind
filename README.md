@@ -91,6 +91,7 @@ Downloading...
 - [ ] Version Manager
 - [ ] GUI Version (maybe)
 
+</br>
 
 ## ⚠️ Disclaimer
 
