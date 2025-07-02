@@ -1,6 +1,9 @@
 # 🌍 Worldbox Rewind
 
-A simple tool to download old versions of **WorldBox** using **SteamCMD** and manifest IDs from [SteamDB](https://steamdb.info/).
+![alt text](assets/mewhen.png)
+
+</br>
+A simple tool to downgrade **WorldBox** using **SteamCMD** and manifest IDs from [SteamDB](https://steamdb.info/) because every fucking update breaks the mods. Yippe.
 
 </br>
 
