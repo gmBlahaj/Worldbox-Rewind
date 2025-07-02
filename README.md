@@ -85,6 +85,13 @@ Downloading...
 
 </br>
 
+## TODO
+- [ ] Bulk Downloading
+- [ ] Automatic ID fetching(?)
+- [ ] Version Manager
+- [ ] GUI Version (maybe)
+
+
 ## ⚠️ Disclaimer
 
 This tool only uses official SteamCMD functionality. You must own WorldBox on Steam to download any content.
