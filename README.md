@@ -8,11 +8,10 @@ A simple tool to download old versions of **WorldBox** using **SteamCMD** and ma
 
 ## ✨ Features
 
-* Pick a platform: Windows, Linux, or Mac.
-* Enter any manifest ID to download a specific version.
-* Step-by-step manifest guide included.
-* Shows download progress.
-* Saves downloaded versions in organized folders.
+* Pick a platform: Windows, Linux, or Mac
+* Enter any manifest ID to download a specific version
+* Step-by-step manifest guide included
+* Version Manager
 
 </br>
 
@@ -65,7 +64,7 @@ python rewind.py
 
 ```bash
 $ python main.py
-🧰 Worldbox Rewind
+ Worldbox Rewind
 Select your platform:
 1. Windows
 2. Linux
@@ -73,7 +72,7 @@ Select your platform:
 
 Enter manifest ID: 1234567890123456789
 Downloading...
-✅ Successfully saved version to: versions/Windows/1234567890123456789
+ Successfully saved version to: versions/Windows/1234567890123456789
 ```
 
 </br>
@@ -88,7 +87,7 @@ Downloading...
 ## TODO
 - [ ] Bulk Downloading
 - [ ] Automatic ID fetching(?)
-- [ ] Version Manager
+- [x] Version Manager
 - [ ] GUI Version (maybe)
 
 </br>

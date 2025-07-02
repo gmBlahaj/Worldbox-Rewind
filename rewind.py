@@ -116,7 +116,7 @@ def show_tutorial():
 
 # Unused!
 def display_loading_bar_DEPR(line: str) -> Optional[float]:
-    pattern = r"(\d{1,3})%\]|\((\d+(?:,\d+)?)\s+(?:von|of)\s+(\d+(?:,\d+)?)\s*KB\)"
+    pattern = r"(\d{1,3})%\]|\((\d(?:,\d)?)\s(?:von|of)\s(\d(?:,\d)?)\s*KB\)"
     match = re.search(pattern, line)
     if match:
         if match.group(1):
@@ -131,7 +131,7 @@ def display_loading_bar_DEPR(line: str) -> Optional[float]:
 # Filter out unnecessary output
 def enableoutput(line: str) -> bool:
     skip_patterns = [
-        r"\[\s*\d+%\]", r"\(\d+.*(?:von|of).*\)",
+        r"\[\s*\d%\]", r"\(\d.*(?:von|of).*\)",
         r"Redirecting stderr to", r"Logging directory:",
         r"UpdateUI: skip show logo", r"^\s*$",
         r"KeyValues Error", r"src/tier1/KeyValues.cpp"
@@ -146,12 +146,12 @@ def steamcmd(username: str, password: Optional[str], manifest_id: str, depot_id:
     version_path = os.path.join(VERSIONS_DIR, platform_folder, manifest_id)
     os.makedirs(version_path, exist_ok=True)
 
-    command = ["steamcmd", "+login", username]
+    command = ["steamcmd", "login", username]
     if password:
         command.append(f'"{password}"')
     command.extend([
-        "+download_depot", APP_ID, depot_id, manifest_id,
-        "+quit"
+        "download_depot", APP_ID, depot_id, manifest_id,
+        "quit"
     ])
     full_command = " ".join(command)
     debug_log(f"Executing: {full_command}")
@@ -170,9 +170,9 @@ def steamcmd(username: str, password: Optional[str], manifest_id: str, depot_id:
     return_code = process.returncode
     for line in process.stdout.splitlines():
         if "Depot download complete" in line:
-            match = re.search(r'Depot download complete : "([^"]+)"', line)
+            match = re.search(r'Depot download complete : "([^"])"', line)
             if match:
-                depot_download_path = re.sub(r'\\+', '/', match.group(1))
+                depot_download_path = re.sub(r'\\', '/', match.group(1))
                 debug_log(f"Download path: {depot_download_path}")
                 break
         elif enableoutput(line.strip()):
