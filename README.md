@@ -1,5 +1,3 @@
-
-
 # 🌍 Worldbox Rewind
 
 A simple tool to download old versions of **WorldBox** using **SteamCMD** and manifest IDs from [SteamDB](https://steamdb.info/).
@@ -10,8 +8,9 @@ A simple tool to download old versions of **WorldBox** using **SteamCMD** and ma
 
 * Pick a platform: Windows, Linux, or Mac
 * Enter any manifest ID to download a specific version
+* Bulk download multiple manifest IDs from a text file
 * Step-by-step manifest guide included
-* Version Manager
+* Version Manager with backup, restore, downgrade capabilities
 
 </br>
 
@@ -34,18 +33,47 @@ pip install -r requirements.txt
 
 3. Run the tool:
 
+For single or interactive download:
+
 ```bash
 python rewind.py
+```
+
+For bulk downloading from a list of manifest IDs:
+
+```bash
+python bulk_rewind.py
+```
+
+For managing versions and backups:
+
+```bash
+python manager.py
 ```
 
 </br>
 
 ## 📚 How to Use
 
+### Rewind.py (Single Download)
+
 1. Choose your platform (Windows, Linux, Mac).
 2. Follow the instructions to find a manifest ID on SteamDB.
 3. Enter the manifest ID.
 4. The version will be downloaded and saved.
+
+### Bulk Rewind (Bulk Download)
+
+1. Choose your platform.
+2. Provide a path to a text file containing manifest IDs (one per line).
+3. The tool will download all listed versions sequentially.
+
+### Manager.py (Version Manager)
+
+1. Set your installation path.
+2. Backup your current installation.
+3. List available backups and versions.
+4. Restore a backup or downgrade to a selected version.
 
 </br>
 
@@ -58,12 +86,18 @@ python rewind.py
   └── Mac/
 ```
 
+Backups are saved in:
+
+```
+/backups/
+```
+
 </br>
 
 ## 📸 Example
 
 ```bash
-$ python main.py
+$ python rewind.py
  Worldbox Rewind
 Select your platform:
 1. Windows
@@ -85,7 +119,7 @@ Downloading...
 </br>
 
 ## TODO
-- [ ] Bulk Downloading
+- [x] Bulk Downloading
 - [ ] Automatic ID fetching(?)
 - [x] Version Manager
 - [ ] GUI Version (maybe)
@@ -95,4 +129,3 @@ Downloading...
 ## ⚠️ Disclaimer
 
 This tool only uses official SteamCMD functionality. You must own WorldBox on Steam to download any content.
-
