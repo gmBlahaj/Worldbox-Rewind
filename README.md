@@ -53,6 +53,9 @@ For managing versions and backups:
 ```bash
 python manager.py
 ```
+### OR
+
+Use the Binaries provided in the Releases Tab, though SteamCMD is still required!
 
 </br>
 

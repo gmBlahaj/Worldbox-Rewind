@@ -2,3 +2,4 @@ storage/
 versions/
 steamdb_debug/
 backups/
+build.sh

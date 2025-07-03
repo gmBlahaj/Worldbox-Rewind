@@ -2,12 +2,12 @@ import os
 import shutil
 import time
 import json
-import typer
-from rich.console import Console
-from rich.prompt import Prompt, IntPrompt
-from rich.panel import Panel
-from rich.table import Table
-from rich.theme import Theme
+import typer  # type: ignore
+from rich.console import Console  # type: ignore
+from rich.prompt import Prompt, IntPrompt  # type: ignore
+from rich.panel import Panel  # type: ignore
+from rich.table import Table  # type: ignore
+from rich.theme import Theme  # type: ignore
 
 CONFIG_PATH = os.path.join("storage", "config.json")
 BACKUPS_DIR = "backups"
@@ -204,7 +204,7 @@ def restore_backup():
         return
 
     try:
-        from rich.progress import Progress, SpinnerColumn, BarColumn, TextColumn, TimeElapsedColumn
+        from rich.progress import Progress, SpinnerColumn, BarColumn, TextColumn, TimeElapsedColumn # type: ignore
 
         
         console.clear()
@@ -294,7 +294,7 @@ def downgrade_version():
         return
 
     try:
-        from rich.progress import Progress, SpinnerColumn, BarColumn, TextColumn, TimeElapsedColumn
+        from rich.progress import Progress, SpinnerColumn, BarColumn, TextColumn, TimeElapsedColumn # type: ignore
 
         
         console.clear()
