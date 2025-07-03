@@ -2,13 +2,13 @@ import os
 import subprocess
 import time
 from typing import Optional
-import typer
-from rich import print
-from rich.prompt import Prompt, IntPrompt
-from rich.panel import Panel
-from rich.console import Console
-from rich.table import Table
-from rich.theme import Theme
+import typer # type: ignore
+from rich import print # type: ignore
+from rich.prompt import Prompt, IntPrompt # type: ignore
+from rich.panel import Panel # type: ignore
+from rich.console import Console # type: ignore
+from rich.table import Table # type: ignore
+from rich.theme import Theme # type: ignore
 import shutil
 import re
 import json
@@ -116,6 +116,8 @@ def enableoutput(line: str) -> bool:
     ]
     return not any(re.search(pattern, line) for pattern in skip_patterns)
 
+import subprocess
+
 def steamcmd(username: str, password: Optional[str], manifest_id: str, depot_id: str):
     debug_log(f"Preparing SteamCMD for manifest {manifest_id} (depot {depot_id})")
     platform_folder = {"1206561": "Windows", "1206562": "Linux", "1206563": "Mac"}.get(depot_id, "Unknown")
@@ -124,16 +126,14 @@ def steamcmd(username: str, password: Optional[str], manifest_id: str, depot_id:
 
     command = ["steamcmd", "+login", username]
     if password:
-        command.append(f'"{password}"')
+        command.append(password)
     command.extend([
         "+download_depot", APP_ID, depot_id, manifest_id,
         "+quit"
     ])
-    full_command = " ".join(command)
-    debug_log(f"Executing: {full_command}")
+    debug_log(f"Executing: {' '.join(command)}")
     console.print(f"[info]Running SteamCMD for manifest {manifest_id}...[/info]")
 
-    return_code = -1
     depot_download_path = None
 
     console.print(Panel.fit(
@@ -142,18 +142,30 @@ def steamcmd(username: str, password: Optional[str], manifest_id: str, depot_id:
         border_style="cyan"
     ))
 
-    process = subprocess.run(full_command, shell=True, capture_output=True, text=True, encoding='utf-8', errors='replace')
-    return_code = process.returncode
-    for line in process.stdout.splitlines():
-        if "Depot download complete" in line:
-            match = re.search(r'Depot download complete : "([^"]+)"', line)
-            if match:
-                depot_download_path = re.sub(r'\\+', '/', match.group(1))
-                debug_log(f"Download path: {depot_download_path}")
-                break
-        elif enableoutput(line.strip()):
-            console.print(f"[steamcmd]{line.strip()}[/steamcmd]")
+    process = subprocess.Popen(command, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, stdin=subprocess.PIPE, text=True, bufsize=1, universal_newlines=True)
 
+    while True:
+        if process.stdout is None:
+            break
+        output = process.stdout.readline()
+        if output == '' and process.poll() is not None:
+            break
+        if output:
+            line = output.strip()
+            if "Steam Guard code" in line or "Steam Guard" in line:
+                steamguard_code = Prompt.ask("Enter Steam Guard code")
+                if process.stdin:
+                    process.stdin.write(steamguard_code + "\n")
+                    process.stdin.flush()
+            elif "Depot download complete" in line:
+                match = re.search(r'Depot download complete : "([^"]+)"', line)
+                if match:
+                    depot_download_path = re.sub(r'\\+', '/', match.group(1))
+                    debug_log(f"Download path: {depot_download_path}")
+            elif enableoutput(line):
+                console.print(f"[steamcmd]{line}[/steamcmd]")
+
+    return_code = process.poll()
     debug_log(f"SteamCMD exited with code {return_code}")
 
     if return_code != 0:

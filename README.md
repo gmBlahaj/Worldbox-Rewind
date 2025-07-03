@@ -126,7 +126,7 @@ Downloading...
 - [ ] Automatic ID fetching(?)
 - [x] Version Manager
 - [ ] GUI Version (maybe)
-- [ ] Actual proper SteamGuard compatibility
+- [x] Actual proper SteamGuard compatibility
 
 </br>
 
