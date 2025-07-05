@@ -20,7 +20,6 @@ LIGHT_TEXT = "#000000"
 DARK_BG = "#000000"  
 
 def steamcmd_gui(username, password, manifest_id, depot_id, callback):
-    """SteamCMD function to run in a thread with status messages."""
     APP_ID = "1206560"
     VERSIONS_DIR = "versions"
     DEBUG_FOLDER = "steamdb_debug"
@@ -107,19 +106,16 @@ def save_config(config):
         json.dump(config, f, indent=4)
 
 class ModernButton(ttk.Button):
-    """Custom styled button"""
     def __init__(self, master=None, **kwargs):
         super().__init__(master, **kwargs)
         self.configure(style='Modern.TButton')
 
 class ModernEntry(ttk.Entry):
-    """Custom styled entry"""
     def __init__(self, master=None, **kwargs):
         super().__init__(master, **kwargs)
         self.configure(style='Modern.TEntry')
 
 class ModernCombobox(ttk.Combobox):
-    """Custom styled combobox"""
     def __init__(self, master=None, **kwargs):
         super().__init__(master, **kwargs)
         self.configure(style='Modern.TCombobox')
@@ -153,16 +149,13 @@ class WorldboxManager:
         )
         self.title_label.pack(side=tk.LEFT, padx=5)
         
-        # Content area
         self.content_frame = ttk.Frame(self.main_frame)
         self.content_frame.pack(fill=tk.BOTH, expand=True)
         
-        # Sidebar
         self.sidebar_frame = ttk.Frame(self.content_frame, width=150, style='Sidebar.TFrame')
         self.sidebar_frame.pack(side=tk.LEFT, fill=tk.Y)
         self.sidebar_frame.pack_propagate(False)
         
-        # Main content
         self.main_content_frame = ttk.Frame(self.content_frame, style='Content.TFrame')
         self.main_content_frame.pack(side=tk.RIGHT, fill=tk.BOTH, expand=True, padx=(10, 0))
         
@@ -173,15 +166,12 @@ class WorldboxManager:
         self.create_versions_view()
         self.create_download_view()
         
-        # Log view
         self.create_log_view()
         
-        # Initialize
         self.update_status()
         self.list_versions()
         self.list_backups()
         
-        # Show home view by default
         self.show_home()
     
     def configure_styles(self):
@@ -192,7 +182,6 @@ class WorldboxManager:
         style.configure('.', background=BG_COLOR, foreground=TEXT_COLOR)
         style.configure('TFrame', background=BG_COLOR)
         
-        # Header style
         style.configure('Header.TFrame', background=PRIMARY_COLOR)
         style.configure('Header.TLabel', 
                        background=PRIMARY_COLOR, 
@@ -273,7 +262,6 @@ class WorldboxManager:
             btn.pack(fill=tk.X, padx=5, pady=3, ipady=3)
     
     def create_status_view(self):
-        """Create the home/status view"""
         self.status_frame = ttk.Frame(self.main_content_frame)
         
         # Status cards
@@ -318,7 +306,6 @@ class WorldboxManager:
         ).pack(side=tk.LEFT, padx=5)
     
     def create_backups_view(self):
-        """Create the backups view"""
         self.backups_frame = ttk.Frame(self.main_content_frame)
         
         # Title
@@ -353,7 +340,6 @@ class WorldboxManager:
         self.backups_list.bind("<Button-3>", self.show_backup_menu)
     
     def create_versions_view(self):
-        """Create the versions view"""
         self.versions_frame = ttk.Frame(self.main_content_frame)
         
         # Title
@@ -388,7 +374,6 @@ class WorldboxManager:
         self.versions_list.bind("<Button-3>", self.show_version_menu)
     
     def create_download_view(self):
-        """Create the version download view"""
         self.download_frame = ttk.Frame(self.main_content_frame)
         
         # Title
@@ -460,7 +445,6 @@ class WorldboxManager:
         form_frame.grid_columnconfigure(1, weight=1)
     
     def create_log_view(self):
-        """Create the debug log view"""
         self.log_frame = ttk.Frame(self.root, style='Debug.TFrame')
         self.log_frame.pack_propagate(False)
         
@@ -498,7 +482,6 @@ class WorldboxManager:
         self.log_frame.pack_forget()
     
     def toggle_debug(self):
-        """Toggle the debug log visibility"""
         self.log_visible = not self.log_visible
         if self.log_visible:
             self.log_frame.pack(fill=tk.X, before=self.main_frame, padx=10, pady=(0, 10))
@@ -506,14 +489,12 @@ class WorldboxManager:
             self.log_frame.pack_forget()
     
     def append_log(self, message):
-        """Append a message to the debug log"""
         self.log_text.config(state='normal')
         self.log_text.insert(tk.END, message + "\n")
         self.log_text.see(tk.END)
         self.log_text.config(state='disabled')
     
     def update_status(self):
-        """Update the status information"""
         path = self.config.get("installation_path", "Not set")
         self.path_label.config(text=path)
         
@@ -522,27 +503,22 @@ class WorldboxManager:
         self.last_backup_label.config(text=last_backup)
     
     def show_home(self):
-        """Show the home/status view"""
         self.hide_all_views()
         self.status_frame.pack(fill=tk.BOTH, expand=True)
     
     def show_backups_view(self):
-        """Show the backups view"""
         self.hide_all_views()
         self.backups_frame.pack(fill=tk.BOTH, expand=True)
     
     def show_versions_view(self):
-        """Show the versions view"""
         self.hide_all_views()
         self.versions_frame.pack(fill=tk.BOTH, expand=True)
     
     def show_download_view(self):
-        """Show the download view"""
         self.hide_all_views()
         self.download_frame.pack(fill=tk.BOTH, expand=True)
     
     def hide_all_views(self):
-        """Hide all content views"""
         for frame in [
             self.status_frame,
             self.backups_frame,
@@ -552,7 +528,6 @@ class WorldboxManager:
             frame.pack_forget()
     
     def set_path(self):
-        """Set the installation path"""
         path = filedialog.askdirectory(title="Select Worldbox Installation Folder")
         if path:
             self.config["installation_path"] = path
@@ -560,7 +535,6 @@ class WorldboxManager:
             self.update_status()
     
     def backup(self):
-        """Create a backup of the current installation"""
         installation_path = self.config.get("installation_path")
         if not installation_path or not os.path.exists(installation_path):
             messagebox.showerror("Error", "Please set a valid installation path first")
@@ -578,7 +552,6 @@ class WorldboxManager:
             messagebox.showerror("Error", f"Backup failed: {str(e)}")
     
     def list_backups(self):
-        """List all available backups"""
         self.backups_list.delete(0, tk.END)
         
         if os.path.exists(BACKUPS_DIR):
@@ -590,7 +563,6 @@ class WorldboxManager:
         self.show_backups_view()
     
     def list_versions(self):
-        """List all available versions"""
         self.versions_list.delete(0, tk.END)
         
         if os.path.exists(VERSIONS_DIR):
@@ -605,7 +577,6 @@ class WorldboxManager:
         self.show_versions_view()
     
     def show_backup_menu(self, event):
-        """Show context menu for backups"""
         try:
             selection = self.backups_list.curselection()
             if selection:
@@ -614,7 +585,6 @@ class WorldboxManager:
             pass
     
     def show_version_menu(self, event):
-        """Show context menu for versions"""
         try:
             selection = self.versions_list.curselection()
             if selection and not self.versions_list.get(selection).startswith("---"):
@@ -623,7 +593,6 @@ class WorldboxManager:
             pass
     
     def restore_selected_backup(self):
-        """Restore the selected backup"""
         selection = self.backups_list.curselection()
         if not selection:
             return
@@ -632,7 +601,6 @@ class WorldboxManager:
         self.restore_backup(backup_name)
     
     def restore_backup(self, backup_name):
-        """Restore a backup"""
         installation_path = self.config.get("installation_path")
         if not installation_path:
             messagebox.showerror("Error", "Please set the installation path first")
@@ -668,7 +636,6 @@ class WorldboxManager:
             messagebox.showerror("Error", f"Failed to restore backup: {str(e)}")
     
     def delete_selected_backup(self):
-        """Delete the selected backup"""
         selection = self.backups_list.curselection()
         if not selection:
             return
@@ -677,7 +644,6 @@ class WorldboxManager:
         self.delete_backup(backup_name)
     
     def delete_backup(self, backup_name):
-        """Delete a backup"""
         if not messagebox.askyesno(
             "Confirm", 
             f"Delete backup {backup_name}?\nThis action cannot be undone."
@@ -696,7 +662,6 @@ class WorldboxManager:
             messagebox.showerror("Error", f"Failed to delete backup: {str(e)}")
     
     def downgrade_selected_version(self):
-        """Downgrade to the selected version"""
         selection = self.versions_list.curselection()
         if not selection:
             return
@@ -705,7 +670,6 @@ class WorldboxManager:
         if version_line.startswith("---"):
             return
         
-        # Find the platform by looking for the previous section header
         platform = None
         for i in range(selection[0], -1, -1):
             line = self.versions_list.get(i)
@@ -721,7 +685,6 @@ class WorldboxManager:
         self.downgrade_to_version(platform, version)
     
     def downgrade_version(self):
-        """Show the downgrade version dialog"""
         if not os.path.exists(VERSIONS_DIR):
             messagebox.showerror("Error", "Versions directory not found")
             return
@@ -731,21 +694,19 @@ class WorldboxManager:
             messagebox.showerror("Error", "No platforms available")
             return
         
-        # Create dialog
+
         dialog = tk.Toplevel(self.root)
         dialog.title("Downgrade Version")
         dialog.transient(self.root)
         dialog.grab_set()
         dialog.geometry("400x300")
         
-        # Platform selection
         ttk.Label(dialog, text="Platform:").grid(row=0, column=0, padx=5, pady=5, sticky=tk.W)
         platform_var = tk.StringVar()
         platform_combo = ModernCombobox(dialog, textvariable=platform_var, values=platforms, state="readonly")
         platform_combo.grid(row=0, column=1, padx=5, pady=5, sticky=tk.EW)
         platform_combo.current(0)
         
-        # Version list
         ttk.Label(dialog, text="Available Versions:").grid(row=1, column=0, columnspan=2, padx=5, pady=5, sticky=tk.W)
         
         versions_frame = ttk.Frame(dialog)
@@ -767,7 +728,6 @@ class WorldboxManager:
         
         versions_scroll.config(command=versions_list.yview)
         
-        # Update versions list when platform changes
         def update_versions(*args):
             versions_list.delete(0, tk.END)
             platform = platform_var.get()
@@ -814,7 +774,6 @@ class WorldboxManager:
         dialog.wait_window()
     
     def downgrade_to_version(self, platform, version):
-        """Downgrade to a specific version"""
         installation_path = self.config.get("installation_path")
         if not installation_path:
             messagebox.showerror("Error", "Installation path not set")
@@ -828,7 +787,6 @@ class WorldboxManager:
 
         source_path = os.path.join(VERSIONS_DIR, platform, version)
         try:
-            # Clear destination
             for item in os.listdir(installation_path):
                 item_path = os.path.join(installation_path, item)
                 if os.path.isdir(item_path):
@@ -859,7 +817,6 @@ class WorldboxManager:
         if version_line.startswith("---"):
             return
         
-        # Find the platform by looking for the previous section header
         platform = None
         for i in range(selection[0], -1, -1):
             line = self.versions_list.get(i)
@@ -875,7 +832,6 @@ class WorldboxManager:
         self.delete_version(platform, version)
     
     def delete_version(self, platform, version):
-        """Delete a version"""
         if not messagebox.askyesno(
             "Confirm", 
             f"Delete version {version} for platform {platform}?\nThis action cannot be undone."
@@ -894,7 +850,6 @@ class WorldboxManager:
             messagebox.showerror("Error", f"Failed to delete version: {str(e)}")
     
     def download_version(self):
-        """Download a version using SteamCMD"""
         username = self.username_entry.get().strip()
         password = self.password_entry.get()
         platform = self.platform_combo.get()
