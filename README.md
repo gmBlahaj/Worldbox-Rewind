@@ -132,7 +132,7 @@ Downloading...
 - [x] Bulk Downloading
 - [ ] Automatic ID fetching(?)
 - [x] Version Manager
-- [ ] GUI Version (maybe)
+- [x] GUI Version (maybe)
 - [x] Actual proper SteamGuard compatibility
 
 </br>

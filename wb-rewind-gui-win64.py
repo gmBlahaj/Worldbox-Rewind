@@ -16,8 +16,8 @@ PRIMARY_COLOR = "#4a6fa5"
 SECONDARY_COLOR = "#6c757d"
 ACCENT_COLOR = "#ff7e5f"
 TEXT_COLOR = "#333333"
-LIGHT_TEXT = "#f8f9fa"
-DARK_BG = "#2c3e50"  
+LIGHT_TEXT = "#000000"
+DARK_BG = "#000000"  
 
 def steamcmd_gui(username, password, manifest_id, depot_id, callback):
     """SteamCMD function to run in a thread with status messages."""
