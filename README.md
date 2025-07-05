@@ -57,6 +57,10 @@ python manager.py
 
 Use the Binaries provided in the Releases Tab, though SteamCMD is still required!
 
+### OR
+
+Use the GUI Version :3 (SteamCMD still required tho!)
+
 </br>
 
 ## 📚 How to Use
