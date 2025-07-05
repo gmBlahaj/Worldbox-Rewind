@@ -85,6 +85,11 @@ Use the GUI Version :3 (SteamCMD still required tho!)
 3. List available backups and versions.
 4. Restore a backup or downgrade to a selected version.
 
+### WorldBox Rewind Manager GUI
+1. Run the GUI executable.
+2. Explore the GUI
+3. Profit
+
 </br>
 
 ## 📁 Downloads Saved In
@@ -106,6 +111,8 @@ Backups are saved in:
 
 ## 📸 Example
 
+### CLI Version
+
 ```bash
 $ python rewind.py
  Worldbox Rewind
@@ -118,6 +125,25 @@ Enter manifest ID: 1234567890123456789
 Downloading...
  Successfully saved version to: versions/Windows/1234567890123456789
 ```
+
+### GUI Version
+</br>
+
+Linux:
+
+</br>
+
+![GUI Screenshot Linux](assets/Linux.png)
+
+</br>
+
+Windows:
+
+</br>
+
+![GUI Screenshot Windows](assets/Windows.png)
+
+
 
 </br>
 
