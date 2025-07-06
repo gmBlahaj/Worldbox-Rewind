@@ -2,13 +2,13 @@ import os
 import subprocess
 import time
 from typing import Optional
-import typer # type: ignore
-from rich import print # type: ignore
-from rich.prompt import Prompt, IntPrompt # type: ignore
-from rich.panel import Panel # type: ignore
-from rich.console import Console # type: ignore
-from rich.table import Table # type: ignore
-from rich.theme import Theme # type: ignore
+import typer  
+from rich import print  
+from rich.prompt import Prompt, IntPrompt  
+from rich.panel import Panel  
+from rich.console import Console  
+from rich.table import Table  
+from rich.theme import Theme  
 import shutil
 import re
 import json
@@ -49,24 +49,22 @@ DEPOTS = {
 APP_ID = "1206560"
 
 
-# Note this is kinda buggy but it worked for me
 def debug_log(message: str, save_to_file: bool = True):
     if DEBUG_MODE:
         console.print(f"[debug]{message}[/debug]")
         if save_to_file:
-            with open(os.path.join(DEBUG_FOLDER, "debug_log.txt"), "a") as f:
+            with open(os.path.join(DEBUG_FOLDER, "debug_log.txt"), "a", encoding="utf-8") as f:
                 f.write(f"{time.strftime('%Y-%m-%d %H:%M:%S')} - {message}\n")
 
 
-#Config shenanigans
 def load_config() -> dict:
     if os.path.exists(CONFIG_PATH):
-        with open(CONFIG_PATH, "r") as f:
+        with open(CONFIG_PATH, "r", encoding="utf-8") as f:
             return json.load(f)
     return {}
 
 def save_config(config: dict):
-    with open(CONFIG_PATH, "w") as f:
+    with open(CONFIG_PATH, "w", encoding="utf-8") as f:
         json.dump(config, f, indent=4)
 
 def get_username() -> str:
@@ -79,7 +77,6 @@ def get_username() -> str:
     return username
 
 
-# Menu
 def show_platform_menu() -> str:
     debug_log("Showing platform selection menu")
     console.print(Panel.fit("[title]Select Platform Version:[/title]", border_style="blue"))
@@ -99,7 +96,6 @@ def show_platform_menu() -> str:
             return DEPOTS[selected]
 
 
-# Tutorial for stupid people
 def show_tutorial():
     tutorial = """
 [title]How to find a Manifest ID[/title]
@@ -114,21 +110,6 @@ def show_tutorial():
     console.print(Panel(tutorial, border_style="blue", title="Tutorial"))
 
 
-# Unused!
-def display_loading_bar_DEPR(line: str) -> Optional[float]:
-    pattern = r"(\d{1,3})%\]|\((\d(?:,\d)?)\s(?:von|of)\s(\d(?:,\d)?)\s*KB\)"
-    match = re.search(pattern, line)
-    if match:
-        if match.group(1):
-            return float(match.group(1))
-        else:
-            current = float(match.group(2).replace(",", ""))
-            total = float(match.group(3).replace(",", ""))
-            return (current / total) * 100 if total > 0 else 0
-    return None
-
-
-# Filter out unnecessary output
 def enableoutput(line: str) -> bool:
     skip_patterns = [
         r"\[\s*\d%\]", r"\(\d.*(?:von|of).*\)",
@@ -139,12 +120,7 @@ def enableoutput(line: str) -> bool:
     return not any(re.search(pattern, line) for pattern in skip_patterns)
 
 
-# Run SteamCMD, like the main thing
-import sys
-import select
-
 def steamcmd(username: str, password: Optional[str], manifest_id: str, depot_id: str):
-    import subprocess
     debug_log(f"Preparing SteamCMD for manifest {manifest_id} (depot {depot_id})")
     platform_folder = {"1206561": "Windows", "1206562": "Linux", "1206563": "Mac"}.get(depot_id, "Unknown")
     version_path = os.path.join(VERSIONS_DIR, platform_folder, manifest_id)
@@ -168,13 +144,21 @@ def steamcmd(username: str, password: Optional[str], manifest_id: str, depot_id:
         border_style="cyan"
     ))
 
-    process = subprocess.Popen(command, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, stdin=subprocess.PIPE, text=True, bufsize=1, universal_newlines=True)
+    process = subprocess.Popen(
+        command,
+        stdout=subprocess.PIPE,
+        stderr=subprocess.STDOUT,
+        stdin=subprocess.PIPE,
+        text=True,               
+        encoding="utf-8",        
+        errors="replace"         
+    )
 
     while True:
         if process.stdout is None:
             break
         output = process.stdout.readline()
-        if output == '' and process.poll() is not None:
+        if output == "" and process.poll() is not None:
             break
         if output:
             line = output.strip()
@@ -216,7 +200,6 @@ def steamcmd(username: str, password: Optional[str], manifest_id: str, depot_id:
         console.print(f"[error]Download path not found: {depot_download_path}[/error]")
 
 
-# CLI
 @app.command()
 def main():
     debug_log("Script started")
