@@ -41,11 +41,6 @@ For single or interactive download:
 python rewind.py
 ```
 
-For bulk downloading from a list of manifest IDs:
-
-```bash
-python bulk_rewind.py
-```
 
 For managing versions and backups:
 
@@ -54,7 +49,7 @@ python manager.py
 ```
 ### OR
 
-Use the Binaries provided in the Releases Tab, though SteamCMD is still required!
+Use the Binaries provided in the Releases Tab, though SteamCMD is still required (except on Windows)!
 
 ### OR
 
