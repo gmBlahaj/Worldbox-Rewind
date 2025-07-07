@@ -109,7 +109,7 @@ Select your platform:
 2. Linux
 3. Mac
 
-Enter manifest ID: 1234567890123456789
+[Manifest ID list]
 Downloading...
  Successfully saved version to: versions/Windows/1234567890123456789
 ```
