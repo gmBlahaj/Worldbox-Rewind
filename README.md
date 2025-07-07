@@ -20,7 +20,7 @@ A simple tool to downgrade WorldBox using SteamCMD and manifest IDs because ever
 ## ✅ Requirements
 
 * Python 3.8 or newer
-* [SteamCMD](https://developer.valvesoftware.com/wiki/SteamCMD) installed and in your system PATH
+* [SteamCMD](https://developer.valvesoftware.com/wiki/SteamCMD) installed and in your system PATH (SteamCMD comes packaged with the Windows version, other Operating Systems still need to install it!)
 
 
 </br>
