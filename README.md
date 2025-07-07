@@ -11,7 +11,6 @@ A simple tool to downgrade WorldBox using SteamCMD and manifest IDs because ever
 
 * Pick a platform: Windows, Linux, or Mac
 * Enter any manifest ID to download a specific version
-* Bulk download multiple manifest IDs from a text file
 * Step-by-step manifest guide included
 * Version Manager with backup, restore, downgrade capabilities
 
