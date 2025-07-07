@@ -21,7 +21,7 @@ DEBUG_MODE = True
 DEBUG_FOLDER = "steamdb_debug"
 VERSIONS_DIR = "versions"
 CONFIG_PATH = os.path.join("storage", "config.json")
-MANIFESTS_URL = "https://example.com/manifests.json" 
+MANIFESTS_URL = "https://gmblahaj.xyz/pages/manifests.json"  
 MANIFESTS_CACHE = os.path.join("storage", "manifests_cache.json")
 
 PLATFORM_DEPOTS = {
