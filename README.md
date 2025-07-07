@@ -59,7 +59,7 @@ Use the Binaries provided in the Releases Tab, though SteamCMD is still required
 
 ### OR
 
-Use the GUI Version :3 (SteamCMD still required tho!)
+Use the GUI Version, experimental (SteamCMD still required tho!)
 
 </br>
 
@@ -72,12 +72,6 @@ Use the GUI Version :3 (SteamCMD still required tho!)
 3. Enter the manifest ID.
 4. The version will be downloaded and saved.
 
-### Bulk Rewind (Bulk Download)
-
-1. Choose your platform.
-2. Provide a path to a text file containing manifest IDs (one per line).
-3. The tool will download all listed versions sequentially.
-
 ### Manager.py (Version Manager)
 
 1. Set your installation path.
@@ -85,7 +79,7 @@ Use the GUI Version :3 (SteamCMD still required tho!)
 3. List available backups and versions.
 4. Restore a backup or downgrade to a selected version.
 
-### WorldBox Rewind Manager GUI
+### WorldBox Rewind Manager GUI (EXPERIMENTAL)
 1. Run the GUI executable.
 2. Explore the GUI
 3. Profit
@@ -126,7 +120,7 @@ Downloading...
  Successfully saved version to: versions/Windows/1234567890123456789
 ```
 
-### GUI Version
+### GUI Version (EXPERIMENTAL)
 </br>
 
 Linux:
@@ -155,7 +149,6 @@ Windows:
 </br>
 
 ## TODO
-- [x] Bulk Downloading
 - [ ] Automatic ID fetching(?)
 - [x] Version Manager
 - [x] GUI Version (maybe)
