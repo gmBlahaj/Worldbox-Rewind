@@ -207,7 +207,7 @@ def steamcmd(username: str, password: Optional[str], manifest_id: str, depot_id:
         if output:
             line = output.strip()
             if "Steam Guard code" in line or "Steam Guard" in line:
-                steamguard_code = Prompt.ask("Enter Steam Guard code (Just press enter if approved In-App)")
+                steamguard_code = Prompt.ask("Enter Steam Guard code (Enter regardless if you approved the login already!)")
                 if process.stdin:
                     process.stdin.write(steamguard_code + "\n")
                     process.stdin.flush()
@@ -231,6 +231,8 @@ def steamcmd(username: str, password: Optional[str], manifest_id: str, depot_id:
         try:
             safe_move(depot_download_path, version_path)
             console.print(f"[success]Saved version to: {version_path}[/success]")
+            input("\nPress Enter to continue...")
+
             try:
                 shutil.rmtree(os.path.dirname(depot_download_path))
                 debug_log(f"Cleaned up: {os.path.dirname(depot_download_path)}")

@@ -175,7 +175,8 @@ def list_versions():
                     console.print(f"  • {v}")
             else:
                 console.print("  [info]No versions found.[/info]")
-                input("\nPress Enter to continue...")
+    input("\nPress Enter to continue...")
+
 
 
    

@@ -13,6 +13,7 @@ import shutil
 import re
 import json
 import getpass
+import threading
 
 # === Paths etc ===
 DEBUG_MODE = True
@@ -54,7 +55,6 @@ custom_theme = Theme({
 app = typer.Typer()
 console = Console(theme=custom_theme)
 
-
 # === Debug Logging ===
 def debug_log(message: str, save_to_file: bool = True):
     timestamp = time.strftime("%Y-%m-%d %H:%M:%S")
@@ -65,7 +65,6 @@ def debug_log(message: str, save_to_file: bool = True):
             with open(os.path.join(DEBUG_FOLDER, f"debug_log_{time.strftime('%Y%m%d')}.txt"), "a", encoding="utf-8") as f:
                 f.write(full_msg + "\n")
 
-
 # === Config Management ===
 def load_config() -> dict:
     if os.path.exists(CONFIG_PATH):
@@ -73,11 +72,9 @@ def load_config() -> dict:
             return json.load(f)
     return {}
 
-
 def save_config(config: dict):
     with open(CONFIG_PATH, "w", encoding="utf-8") as f:
         json.dump(config, f, indent=4)
-
 
 def get_username() -> str:
     config = load_config()
@@ -88,11 +85,9 @@ def get_username() -> str:
     save_config(config)
     return username
 
-
 # === SteamCMD Check ===
 def check_steamcmd() -> bool:
-    return shutil.which("steamcmd") is not None
-
+    return shutil.which("steamcmd") is not None or os.path.exists("utils/steamcmd.exe")
 
 # === Platform Menu ===
 def show_platform_menu() -> str:
@@ -113,7 +108,6 @@ def show_platform_menu() -> str:
             debug_log(f"User selected: {selected} (Depot: {PLATFORM_DEPOTS[selected]})")
             return PLATFORM_DEPOTS[selected]
 
-
 # === Tutorial Display ===
 def show_tutorial():
     tutorial = """
@@ -128,11 +122,9 @@ def show_tutorial():
 """
     console.print(Panel(tutorial, border_style="blue", title="Tutorial"))
 
-
 def show_tutorial_if_needed(skip: bool):
     if not skip:
         show_tutorial()
-
 
 # === Output Filter ===
 def enableoutput(line: str) -> bool:
@@ -143,7 +135,6 @@ def enableoutput(line: str) -> bool:
         r"KeyValues Error", r"src/tier1/KeyValues.cpp"
     ]
     return not any(re.search(pattern, line) for pattern in skip_patterns)
-
 
 # === Safe Move Files ===
 def safe_move(src_dir: str, dest_dir: str):
@@ -156,12 +147,10 @@ def safe_move(src_dir: str, dest_dir: str):
                 os.remove(d)
         shutil.move(s, d)
 
-
 # === Abort Helper ===
 def abort(message: str = "Aborted."):
     console.print(f"[warning]{message}[/warning]")
     raise typer.Exit(1)
-
 
 # === SteamCMD Execution ===
 def steamcmd(username: str, password: Optional[str], manifest_id: str, depot_id: str):
@@ -181,6 +170,19 @@ def steamcmd(username: str, password: Optional[str], manifest_id: str, depot_id:
     console.print("[info]Running SteamCMD...[/info]")
 
     depot_download_path = None
+    steam_guard_sent = False
+
+    def send_flush_after_timeout(proc):
+        nonlocal steam_guard_sent
+        time.sleep(10)
+        if proc.poll() is None and proc.stdin:
+            try:
+                proc.stdin.write("\n")
+                proc.stdin.flush()
+                steam_guard_sent = True
+                debug_log("Sent empty line to SteamCMD to flush potential Steam Guard prompt.")
+            except Exception as e:
+                debug_log(f"Failed to flush input to SteamCMD: {e}")
 
     console.print(Panel.fit(
         "[bold yellow]If Steam Guard is enabled, approve the login on your Steam Mobile App or email.[/bold yellow]\n\n"
@@ -198,6 +200,8 @@ def steamcmd(username: str, password: Optional[str], manifest_id: str, depot_id:
         errors="replace"
     )
 
+    threading.Thread(target=send_flush_after_timeout, args=(process,), daemon=True).start()
+
     while True:
         if process.stdout is None:
             break
@@ -206,11 +210,15 @@ def steamcmd(username: str, password: Optional[str], manifest_id: str, depot_id:
             break
         if output:
             line = output.strip()
+            debug_log(f"SteamCMD: {line}")
             if "Steam Guard code" in line or "Steam Guard" in line:
-                steamguard_code = Prompt.ask("Enter Steam Guard code (Just press enter if approved In-App)")
-                if process.stdin:
-                    process.stdin.write(steamguard_code + "\n")
-                    process.stdin.flush()
+                try:
+                    steamguard_code = Prompt.ask("Enter Steam Guard code (even if already approved)")
+                    if steamguard_code and process.stdin:
+                        process.stdin.write(steamguard_code + "\n")
+                        process.stdin.flush()
+                except Exception as e:
+                    debug_log(f"Steam Guard input failed: {e}")
             elif "Depot download complete" in line:
                 match = re.search(r'Depot download complete : "([^"]+)"', line)
                 if match:
@@ -231,6 +239,7 @@ def steamcmd(username: str, password: Optional[str], manifest_id: str, depot_id:
         try:
             safe_move(depot_download_path, version_path)
             console.print(f"[success]Saved version to: {version_path}[/success]")
+            input("\nPress Enter to continue...")
             try:
                 shutil.rmtree(os.path.dirname(depot_download_path))
                 debug_log(f"Cleaned up: {os.path.dirname(depot_download_path)}")
@@ -242,7 +251,6 @@ def steamcmd(username: str, password: Optional[str], manifest_id: str, depot_id:
     else:
         console.print(f"[error]Download path not found: {depot_download_path}[/error]")
 
-
 # === CLI Entry Point ===
 @app.command()
 def main(no_tutorial: bool = typer.Option(False, "--no-tutorial", help="Skip manifest tutorial.")):
@@ -250,16 +258,23 @@ def main(no_tutorial: bool = typer.Option(False, "--no-tutorial", help="Skip man
     console.print(Panel.fit("[success]WorldBox Rewind[/success]", border_style="green"))
 
     if not check_steamcmd():
-        console.print("[error]steamcmd not found in PATH. Please install it first.[/error]")
+        console.print("[error]steamcmd not found. Ensure it exists at utils/steamcmd.exe or in your PATH.[/error]")
         raise typer.Exit(1)
 
     try:
         username = get_username()
-        password = getpass.getpass("Steam password: ").strip() or None
+        password = getpass.getpass("Steam password: ").strip()
+        if not password:
+            console.print("[warning]No password entered. Attempting login without it...[/warning]")
 
         depot_id = show_platform_menu()
         show_tutorial_if_needed(no_tutorial)
-        manifest_id = Prompt.ask("[bold yellow]Enter Manifest ID[/bold yellow]").strip()
+
+        manifest_id = ""
+        while not manifest_id:
+            manifest_id = Prompt.ask("[bold yellow]Enter Manifest ID[/bold yellow]").strip()
+            if not manifest_id:
+                console.print("[error]Manifest ID cannot be empty.[/error]")
 
         platform_folder = DEPOT_PLATFORMS.get(depot_id, "Unknown")
         version_path = os.path.join(VERSIONS_DIR, platform_folder, manifest_id)
@@ -281,7 +296,6 @@ def main(no_tutorial: bool = typer.Option(False, "--no-tutorial", help="Skip man
         raise typer.Exit(1)
     finally:
         debug_log("Script finished")
-
 
 if __name__ == "__main__":
     app()
