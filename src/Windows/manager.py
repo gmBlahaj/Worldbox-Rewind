@@ -10,13 +10,13 @@ from rich.table import Table
 from rich.theme import Theme
 from rich.progress import Progress, SpinnerColumn, BarColumn, TextColumn, TimeElapsedColumn
 
-# Paths
+
 CONFIG_PATH = os.path.join("storage", "config.json")
 BACKUPS_DIR = "backups"
 VERSIONS_DIR = "versions"
 DEBUG_FOLDER = "steamdb_debug"
 
-# Color scheme
+
 app = typer.Typer()
 console = Console(theme=Theme({
     "info": "dim cyan",
@@ -34,7 +34,7 @@ os.makedirs(DEBUG_FOLDER, exist_ok=True)
 
 DEBUG_MODE = False
 
-# === Utility Functions ===
+
 
 def debug_log(msg: str):
     if DEBUG_MODE:
@@ -95,7 +95,7 @@ def copy_with_progress(src, dst, action="Copying"):
                 progress.update(task, advance=1)
 
 
-# === Main Functions ===
+
 
 def show_menu():
     clear_terminal()
@@ -153,7 +153,7 @@ def list_versions():
     clear_terminal()
     console.print(Panel.fit("[title]Available Backups and Versions[/title]", border_style="blue"))
 
-    # Backups
+    
     backups = list_directory(BACKUPS_DIR)
     console.print("\n[bold underline]Backups:[/bold underline]")
     if backups:
@@ -162,7 +162,7 @@ def list_versions():
     else:
         console.print("[info]No backups found.[/info]")
 
-    # Versions
+    
     console.print("\n[bold underline]Versions:[/bold underline]")
     if not os.path.exists(VERSIONS_DIR):
         console.print("[warning]Versions directory not found.[/warning]")
@@ -266,7 +266,7 @@ def downgrade_version():
 
 
 
-# === Entry Point ===
+
 
 @app.command()
 def main(debug: bool = typer.Option(False, help="Enable debug logging")):

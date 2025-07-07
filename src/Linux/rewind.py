@@ -4,7 +4,7 @@ import time
 from typing import Optional
 import typer
 from rich import print
-from rich.prompt import Prompt, IntPrompt
+from rich.prompt import Prompt, IntPrompt, Confirm
 from rich.panel import Panel
 from rich.console import Console
 from rich.table import Table
@@ -13,14 +13,17 @@ import shutil
 import re
 import json
 import getpass
+import requests
 
-# === Paths etc ===
+
 DEBUG_MODE = True
 DEBUG_FOLDER = "steamdb_debug"
 VERSIONS_DIR = "versions"
 CONFIG_PATH = os.path.join("storage", "config.json")
+MANIFESTS_URL = "https://gmblahaj.xyz/pages/manifests.json"  
+MANIFESTS_CACHE = os.path.join("storage", "manifests_cache.json")
 
-# === Platform Definitions ===
+
 PLATFORM_DEPOTS = {
     "Windows": "1206561",
     "Linux": "1206562",
@@ -29,13 +32,13 @@ PLATFORM_DEPOTS = {
 DEPOT_PLATFORMS = {v: k for k, v in PLATFORM_DEPOTS.items()}
 APP_ID = "1206560"
 
-# === Folder Initialization ===
+
 os.makedirs(DEBUG_FOLDER, exist_ok=True)
 os.makedirs("storage", exist_ok=True)
 for folder in PLATFORM_DEPOTS.keys():
     os.makedirs(os.path.join(VERSIONS_DIR, folder), exist_ok=True)
 
-# === Theme Setup ===
+
 custom_theme = Theme({
     "info": "dim cyan",
     "warning": "magenta",
@@ -50,12 +53,70 @@ custom_theme = Theme({
     "debug": "dim grey50"
 })
 
-# === App Init ===
+
 app = typer.Typer()
 console = Console(theme=custom_theme)
 
 
-# === Debug Logging ===
+def get_manifest_data() -> dict:
+    """Fetch manifest data from URL or cache"""
+    try:
+        
+        if os.path.exists(MANIFESTS_CACHE):
+            with open(MANIFESTS_CACHE, "r", encoding="utf-8") as f:
+                cached_data = json.load(f)
+                if cached_data:
+                    debug_log("Loaded manifests from cache")
+                    return cached_data
+        
+        
+        debug_log("Fetching manifests from remote URL")
+        response = requests.get(MANIFESTS_URL)
+        response.raise_for_status()
+        data = response.json()
+        
+        
+        with open(MANIFESTS_CACHE, "w", encoding="utf-8") as f:
+            json.dump(data, f)
+        
+        return data
+    except Exception as e:
+        debug_log(f"Error fetching manifest data: {e}")
+        console.print(f"[error]Failed to fetch manifest data: {e}[/error]")
+        return {}
+
+def show_version_menu(platform: str, manifest_data: dict) -> Optional[str]:
+    """Show version selection menu for a platform"""
+    versions = manifest_data.get(platform, [])
+    if not versions:
+        console.print(f"[error]No versions found for {platform}[/error]")
+        return None
+    
+    console.print(Panel.fit(f"[title]Available {platform} Versions[/title]", border_style="blue"))
+    table = Table(show_header=True, header_style="bold magenta")
+    table.add_column("Option", style="dim", width=8)
+    table.add_column("Date", width=25)
+    table.add_column("Manifest ID", style="highlight")
+    
+    for i, version in enumerate(versions, start=1):
+        table.add_row(str(i), version["date"], version["id"])
+    
+    console.print(table)
+    
+    while True:
+        try:
+            choice = IntPrompt.ask(
+                f"Select version (1-{len(versions)})",
+                choices=[str(i) for i in range(1, len(versions)+1)],
+                show_choices=False
+            )
+            selected = versions[choice - 1]
+            debug_log(f"Selected version: {selected['date']} (ID: {selected['id']})")
+            return selected["id"]
+        except (ValueError, IndexError):
+            console.print("[error]Invalid selection. Please try again.[/error]")
+
+
 def debug_log(message: str, save_to_file: bool = True):
     timestamp = time.strftime("%Y-%m-%d %H:%M:%S")
     full_msg = f"{timestamp} - {message}"
@@ -66,18 +127,15 @@ def debug_log(message: str, save_to_file: bool = True):
                 f.write(full_msg + "\n")
 
 
-# === Config Management ===
 def load_config() -> dict:
     if os.path.exists(CONFIG_PATH):
         with open(CONFIG_PATH, "r", encoding="utf-8") as f:
             return json.load(f)
     return {}
 
-
 def save_config(config: dict):
     with open(CONFIG_PATH, "w", encoding="utf-8") as f:
         json.dump(config, f, indent=4)
-
 
 def get_username() -> str:
     config = load_config()
@@ -89,12 +147,10 @@ def get_username() -> str:
     return username
 
 
-# === SteamCMD Check ===
 def check_steamcmd() -> bool:
     return shutil.which("steamcmd") is not None
 
 
-# === Platform Menu ===
 def show_platform_menu() -> str:
     debug_log("Showing platform selection menu")
     console.print(Panel.fit("[title]Select Platform Version:[/title]", border_style="blue"))
@@ -114,27 +170,6 @@ def show_platform_menu() -> str:
             return PLATFORM_DEPOTS[selected]
 
 
-# === Tutorial Display ===
-def show_tutorial():
-    tutorial = """
-[title]How to find a Manifest ID[/title]
-
-1. Visit SteamDB WorldBox depot for your platform:
-   - [bold]Windows:[/bold] https://steamdb.info/depot/1206561/manifests/
-   - [bold]Linux:[/bold] https://steamdb.info/depot/1206562/manifests
-   - [bold]Mac:[/bold] https://steamdb.info/depot/1206563/manifests
-
-2. Copy the Manifest ID you want from the list.
-"""
-    console.print(Panel(tutorial, border_style="blue", title="Tutorial"))
-
-
-def show_tutorial_if_needed(skip: bool):
-    if not skip:
-        show_tutorial()
-
-
-# === Output Filter ===
 def enableoutput(line: str) -> bool:
     skip_patterns = [
         r"\[\s*\d%\]", r"\(\d.*(?:von|of).*\)",
@@ -145,7 +180,6 @@ def enableoutput(line: str) -> bool:
     return not any(re.search(pattern, line) for pattern in skip_patterns)
 
 
-# === Safe Move Files ===
 def safe_move(src_dir: str, dest_dir: str):
     for item in os.listdir(src_dir):
         s, d = os.path.join(src_dir, item), os.path.join(dest_dir, item)
@@ -157,13 +191,11 @@ def safe_move(src_dir: str, dest_dir: str):
         shutil.move(s, d)
 
 
-# === Abort Helper ===
 def abort(message: str = "Aborted."):
     console.print(f"[warning]{message}[/warning]")
     raise typer.Exit(1)
 
 
-# === SteamCMD Execution ===
 def steamcmd(username: str, password: Optional[str], manifest_id: str, depot_id: str):
     debug_log(f"Preparing SteamCMD for manifest {manifest_id} (depot {depot_id})")
     platform_folder = DEPOT_PLATFORMS.get(depot_id, "Unknown")
@@ -245,9 +277,8 @@ def steamcmd(username: str, password: Optional[str], manifest_id: str, depot_id:
         console.print(f"[error]Download path not found: {depot_download_path}[/error]")
 
 
-# === CLI Entry Point ===
 @app.command()
-def main(no_tutorial: bool = typer.Option(False, "--no-tutorial", help="Skip manifest tutorial.")):
+def main():
     debug_log("Script started")
     console.print(Panel.fit("[success]WorldBox Rewind[/success]", border_style="green"))
 
@@ -256,26 +287,35 @@ def main(no_tutorial: bool = typer.Option(False, "--no-tutorial", help="Skip man
         raise typer.Exit(1)
 
     try:
+        
+        manifest_data = get_manifest_data()
+        if not manifest_data:
+            abort("No manifest data available. Please check your connection or the manifest source.")
+
         username = get_username()
         password = getpass.getpass("Steam password: ").strip() or None
 
+        
         depot_id = show_platform_menu()
-        show_tutorial_if_needed(no_tutorial)
-        manifest_id = Prompt.ask("[bold yellow]Enter Manifest ID[/bold yellow]").strip()
+        platform_name = DEPOT_PLATFORMS.get(depot_id, "Unknown")
+        
+        
+        manifest_id = show_version_menu(platform_name, manifest_data)
+        if not manifest_id:
+            abort("No version selected.")
 
-        platform_folder = DEPOT_PLATFORMS.get(depot_id, "Unknown")
-        version_path = os.path.join(VERSIONS_DIR, platform_folder, manifest_id)
+        version_path = os.path.join(VERSIONS_DIR, platform_name, manifest_id) # type: ignore
 
         if os.path.exists(version_path) and os.listdir(version_path):
-            overwrite = Prompt.ask(
-                f"[warning]Version {manifest_id} already exists. Redownload?[/warning] (y/n)",
-                choices=["y", "n"], default="n"
+            overwrite = Confirm.ask(
+                f"[warning]Version {manifest_id} already exists. Redownload?[/warning]",
+                default=False
             )
-            if overwrite.lower() != "y":
+            if not overwrite:
                 abort("Skipped existing version.")
 
-        steamcmd(username, password, manifest_id, depot_id)
-    except KeyboardInterrupt:
+        steamcmd(username, password, manifest_id, depot_id)  # type: ignore
+    except KeyboardInterrupt: 
         abort("Interrupted by user.")
     except Exception as e:
         debug_log(f"Unhandled exception: {e}")
@@ -283,7 +323,6 @@ def main(no_tutorial: bool = typer.Option(False, "--no-tutorial", help="Skip man
         raise typer.Exit(1)
     finally:
         debug_log("Script finished")
-
 
 if __name__ == "__main__":
     app()

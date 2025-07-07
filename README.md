@@ -143,7 +143,7 @@ Windows:
 </br>
 
 ## TODO
-- [ ] Automatic ID fetching(?)
+- [x] Automatic ID fetching(?)
 - [x] Version Manager
 - [x] GUI Version (maybe)
 - [x] Actual proper SteamGuard compatibility
