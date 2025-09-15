@@ -4,7 +4,7 @@
 
 </br>
 A simple tool to downgrade WorldBox using SteamCMD and manifest IDs because every fucking update breaks mods. Yippe. But in all honesty, it's easier to just use SteamCMD as is ngl.
-And Cody or some other WorldBox Dev is seing this, the image above is a fucking meme and nothing more, don't get your panties in a twist.
+And if Cody or some other WorldBox Dev is seing this, the image above is a fucking meme and nothing more, don't get your panties in a twist.
 
 </br>
 
